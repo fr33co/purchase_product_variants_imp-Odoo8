@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record model="ir.ui.view" id="purchase_order_extended_form_view_imp">
+            <field name="name">purchase.order.extended.form.imp</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase_product_variants.purchase_order_extended_form_view" />
+            <field name="priority" eval="19" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree//field[@name='product_uom']"
+                       position="after">
+                    <field name="product_cantidad_total"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="purchase_order_line_extended_form_view_imp">
+            <field name="name">purchase.order.line.extended.form.imp</field>
+            <field name="model">purchase.order.line</field>
+            <field name="inherit_id" ref="purchase_product_variants.purchase_order_line_extended_form_view" />
+            <field name="arch" type="xml">
+
+                <field name="product_template" position="replace">
+                    <field name="product_template" />
+                    <div colspan="4"
+                         attrs="{'invisible': [('product_attributes', '=', [])]}">
+                        <label for="product_attributes"/>
+                        <field name="product_attributes">
+                            <tree create="false" delete="false" editable="1">
+                                <field name="possible_values" invisible="1" />
+                                <field name="attribute" />
+                                <field name="value" />
+                                <field name="size_z"/>
+                                <field name="size_x"/>
+                                <field name="size_y"/>
+                                <field name="price_extra" string="Precio" />
+                            </tree>
+                        </field>
+                    </div>
+                    <field name="product_cantidad_total"/>
+                </field>
+
+                <field name="price_unit" position="after">
+                    <field name="product_cantidad_total"/>
+                </field>
+
+            </field>
+        </record>
+
+
+
+    </data>
+</openerp>
