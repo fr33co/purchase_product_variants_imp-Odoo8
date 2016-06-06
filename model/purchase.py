@@ -42,7 +42,7 @@ class ProductAttributeValuePurchaseLine(models.Model):
 				price_extra = price.price_extra
 				if price_extra == 0:
 					if price.value_id.id!=66 and price.value_id.id!=67:
-						self.price_extra = self.purchase_line.product_template.list_price * self.mp_qty
+						self.price_extra = self.purchase_line.product_template.standard_price * self.mp_qty
 				else:
 					self.price_extra = price_extra * self.mp_qty
 
