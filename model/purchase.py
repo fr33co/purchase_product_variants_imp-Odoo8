@@ -20,18 +20,32 @@ from openerp import models, fields, api, exceptions, _
 from openerp.addons import decimal_precision as dp
 
 
+class PurchaseOrder(models.Model):
+    _inherit = "purchase.order"
+
+    @api.multi
+    def wkf_confirm_order(self):
+        """Create possible product variants not yet created."""
+        for order in self:
+            for line in order.order_line:
+				print line
+				print line.product_cantidad_total
+				product_tmpl_id = self.env['product.product'].browse(line.id).product_tmpl_id
+				product_tmpl_id.write({'qty_available': line.product_cantidad_total})
+        return super(PurchaseOrder, self).wkf_confirm_order()
+
+
 class ProductAttributeValuePurchaseLine(models.Model):
 	_inherit = 'purchase.order.line.attribute'
 
 	@api.one
-	@api.depends('value', 'purchase_line.product_template', 'size_x','size_y','size_z')
+	@api.depends('value', 'purchase_line.product_template', 'size_x','size_y')
 	def _get_qty(self):
 		mp_qty = 1
 		for mpqty in self.value.price_ids:
-			print mpqty
 			if mpqty.product_tmpl_id.id == self.purchase_line.product_template.id:
 				mp_qty = mpqty.raw_qty
-		self.mp_qty = 1 * (self.size_x or 1.0) * (self.size_y or 1.0) * (self.size_z)
+		self.mp_qty = 1 * (self.size_x or 1.0) * (self.size_y or 1.0)
 
 	@api.one
 	@api.depends('value', 'purchase_line.product_template', 'mp_qty')
@@ -58,14 +72,12 @@ class ProductAttributeValuePurchaseLine(models.Model):
 				attr_values |= attr_line.value_ids
 		self.possible_values = attr_values.sorted()
 
-	price_extra = fields.Float(
-		compute='_get_price_extra', readonly=False, string='Precio',
+	price_extra = fields.Float(compute='_get_price_extra', readonly=False, string='Precio',
 		digits=dp.get_precision('Product Price'),
 		help="")
 	mp_qty = fields.Float(compute='_get_qty', readonly=False, string='Cantidad', help="Cantidad de materia prima a Utilizar")
 	size_x = fields.Float(digits=(16,2), string='Largo')
 	size_y = fields.Float(digits=(16,2), string='Ancho/Alto')
-	size_z = fields.Float(digits=(16,2), string='qty')
 
 
 class PurchaseOrderLine(models.Model):
@@ -174,6 +186,7 @@ class PurchaseOrderLine(models.Model):
 		if self.product_template:
 			self.update_price_unit()
 			self.update_uom_qty()
+			self.cantidad_total = self.product_qty * self.product_cantidad_total
 
     @api.multi
     def action_duplicate(self):
@@ -243,8 +256,3 @@ class PurchaseOrderLine(models.Model):
             for attr_line in self.product_attributes:
                 if attr_line.size_y > 0:
                     self.product_cantidad_total += attr_line.mp_qty
-
-
-	@api.onchange('product_qty','product_cantidad_total')
-	def on_change_qty(self):
-		self.cantidad_total = self.product_qty * self.product_cantidad_total

@@ -11,15 +11,27 @@
                 <field name="value" position="after">
 					          <field name="size_x"/>
                     <field name="size_y"/>
-                    <field name="size_z"/>
                     <field name="mp_qty" string="Total Material" editable="0"/>
                     <field name="price_extra" string="Precio" />
                 </field>
 
                 <field name="price_unit" position="after">
                     <field name="product_cantidad_total"/>
+                    <field name="cantidad_total" />
                 </field>
 
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="purchase_order_extended_form_view_imp">
+            <field name="name">purchase.order.extended.form.imp</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree//field[@name='product_qty']"
+                       position="after">
+                    <field name="cantidad_total"/>
+                </xpath>
             </field>
         </record>
 
